@@ -1,0 +1,15 @@
+{
+  "name": "海厝寻迹·中我岛村电子集章",
+  "short_name": "海厝寻迹",
+  "description": "胶东织梦，海厝新生——中我岛村数智电子集章系统",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f293a",
+  "theme_color": "#0f293a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
