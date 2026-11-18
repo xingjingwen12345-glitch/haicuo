@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海草房营造 · 非遗造房小游戏</title>
+<style>
+  :root{
+    --ink:#2c2622; --muted:#6f645c; --line:#e6dbcc;
+    --paper:#fbf6ee; --red:#b13b2a; --red2:#d4563f; --gold:#c99a4e;
+    --sea:#2f7f96; --ok:#3f8f6b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(900px 600px at 15% 0%,#fff7ea,transparent 60%),linear-gradient(160deg,#f7efe3,#f1e6d6 60%,#eadfcd);
+    min-height:100%;overflow-x:hidden}
+  .wrap{max-width:1320px;margin:0 auto;padding:16px 18px 26px;display:flex;flex-direction:column;gap:14px}
+
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .mark{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#b13b2a,#8a2c1e);box-shadow:0 8px 18px rgba(177,59,42,.28)}
+  .brand .mark svg{width:26px;height:26px}
+  .brand b{font-size:19px;letter-spacing:.06em}
+  .brand small{display:block;font-size:9.5px;letter-spacing:.2em;color:var(--muted);margin-top:2px}
+  .badge{font-size:10.5px;padding:5px 11px;border-radius:999px;border:1px solid rgba(177,59,42,.35);color:var(--red);background:rgba(177,59,42,.06)}
+  .spacer{flex:1}
+  .tide{width:210px;display:flex;flex-direction:column;gap:4px}
+  .tide .lb{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted)}
+  .tide .track{height:8px;border-radius:8px;background:rgba(47,127,150,.14);overflow:hidden;position:relative}
+  .tide .fill{position:absolute;inset:0 100% 0 0;background:linear-gradient(90deg,#5fb4c4,#1d5f74);transition:right .2s linear}
+  .tide.warn .fill{background:linear-gradient(90deg,#e2915a,#b13b2a)}
+  .iconbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;font-size:15px}
+  .iconbtn:hover{border-color:var(--gold);color:var(--red)}
+
+  main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(340px,1fr);gap:14px;align-items:start}
+  @media (max-width:980px){main{grid-template-columns:1fr}}
+
+  .scene{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#dceef3;
+    box-shadow:0 18px 40px -22px rgba(60,40,20,.5);touch-action:none}
+  .scene svg{display:block;width:100%;height:auto}
+  .hint{position:absolute;left:50%;bottom:48px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;
+    padding:7px 14px;border-radius:999px;background:rgba(255,253,248,.94);border:1px solid var(--line);
+    font-size:11.5px;color:var(--ink);box-shadow:0 8px 20px rgba(60,40,20,.12);white-space:nowrap;z-index:3}
+  .hint i{width:7px;height:7px;border-radius:50%;background:var(--red2);box-shadow:0 0 0 4px rgba(212,86,63,.18);animation:blink 1.4s infinite}
+  @keyframes blink{0%,100%{opacity:.35}50%{opacity:1}}
+  .scene .tag{position:absolute;left:12px;bottom:10px;font-size:9.5px;color:rgba(44,38,34,.55);letter-spacing:.12em}
+
+  .panel{display:flex;flex-direction:column;gap:11px;background:linear-gradient(180deg,#fffdf9,#faf3e8);
+    border:1px solid var(--line);border-radius:16px;padding:14px 15px;box-shadow:0 18px 40px -26px rgba(60,40,20,.45)}
+  .steps{display:flex;gap:5px}
+  .step{flex:1;height:5px;border-radius:5px;background:rgba(120,100,80,.14);overflow:hidden}
+  .step.done{background:linear-gradient(90deg,var(--gold),var(--red2))}
+  .step.cur{background:linear-gradient(90deg,var(--red2),var(--gold));animation:pulseBar 1.6s infinite}
+  @keyframes pulseBar{0%,100%{opacity:1}50%{opacity:.55}}
+  .stagehead{display:flex;align-items:baseline;gap:8px}
+  .stagehead .no{font-size:11px;color:var(--red);font-weight:700;letter-spacing:.1em}
+  .stagehead h2{font-size:17px;letter-spacing:.04em}
+  .tip{font-size:11.5px;color:var(--muted);line-height:1.7;padding:8px 10px;border-radius:9px;background:rgba(201,154,78,.09);border:1px dashed rgba(201,154,78,.35)}
+  .controls{display:flex;flex-direction:column;gap:9px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 16px;border-radius:10px;
+    border:1px solid var(--line);background:#fff;color:var(--ink);font-size:13px;cursor:pointer;transition:.15s;font-family:inherit}
+  .btn:hover{border-color:var(--gold);box-shadow:0 6px 14px rgba(201,154,78,.18)}
+  .btn.primary{background:linear-gradient(135deg,var(--red2),var(--red));border-color:#a3352a;color:#fff;font-weight:700}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .meter{flex:1;height:9px;border-radius:9px;background:rgba(120,100,80,.14);overflow:hidden}
+  .meter div{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--red2));transition:width .25s}
+  .chip{font-size:10.5px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:#fff}
+  .stat{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);padding-top:8px;border-top:1px dashed var(--line)}
+  .stat b{color:var(--ink);font-family:"DIN Alternate","Bahnschrift",monospace;font-size:14px}
+
+  /* 示意动画 */
+  .demo{border-radius:11px;border:1px solid rgba(201,154,78,.35);background:linear-gradient(180deg,#fffaf1,#f7eddd);overflow:hidden;position:relative}
+  .demo svg{display:block;width:100%;height:96px}
+  .demo .cap{position:absolute;left:10px;bottom:6px;font-size:9.5px;letter-spacing:.14em;color:rgba(110,90,60,.7)}
+
+  .rhythm{position:relative;height:34px;border-radius:10px;background:linear-gradient(90deg,#f3e7d5,#efe2cf);border:1px solid var(--line);overflow:hidden}
+  .rhythm .zone{position:absolute;top:0;bottom:0;width:16%;left:42%;background:rgba(63,143,107,.28);border-left:1px solid rgba(63,143,107,.5);border-right:1px solid rgba(63,143,107,.5)}
+  .rhythm .knob{position:absolute;top:-3px;bottom:-3px;width:4px;border-radius:3px;background:var(--red);box-shadow:0 0 8px rgba(177,59,42,.5)}
+  .rhythm .hits{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted)}
+
+  .overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(30,22,16,.55);backdrop-filter:blur(4px);padding:18px}
+  .overlay.on{display:flex}
+  .card{width:min(560px,94vw);border-radius:18px;background:linear-gradient(180deg,#fffdf8,#faf2e5);border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.35);padding:22px 24px}
+  .card .k{font-size:10px;letter-spacing:.22em;color:var(--red);font-weight:700}
+  .card h3{font-size:19px;margin:6px 0 10px}
+  .card p{font-size:13px;line-height:1.9;color:#4a4038}
+  .card .note{margin-top:12px;font-size:11.5px;color:var(--muted);line-height:1.7;padding:10px 12px;border-radius:10px;background:rgba(201,154,78,.1);border:1px dashed rgba(201,154,78,.4)}
+  .card .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+  .done-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+  .done-grid div{padding:10px;border-radius:10px;background:#fff;border:1px solid var(--line);text-align:center}
+  .done-grid em{font-style:normal;font-size:10px;color:var(--muted);display:block}
+  .done-grid b{font-size:20px;color:var(--red);font-family:"DIN Alternate",monospace}
+  .grade{font-size:13px;color:var(--red);font-weight:700;margin-top:6px}
+
+  .float{position:absolute;pointer-events:none;font-size:12px;font-weight:700;color:#fff;background:rgba(177,59,42,.9);
+    padding:3px 8px;border-radius:999px;animation:fly .9s ease-out forwards;z-index:5}
+  @keyframes fly{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-26px)}}
+
+  /* 示意动画关键帧 */
+  @keyframes dHammer{0%,100%{transform:translateY(-12px) rotate(-18deg)}45%{transform:translateY(6px) rotate(6deg)}}
+  @keyframes dDust{0%,60%{opacity:0;transform:scale(.4)}75%{opacity:.8;transform:scale(1.6)}100%{opacity:0;transform:scale(2.2)}}
+  @keyframes dStone{0%{transform:translate(-58px,-30px);opacity:0}25%{opacity:1}55%{transform:translate(0,0)}70%{transform:translate(0,-4px)}80%{transform:translate(0,0)}100%{transform:translate(0,0);opacity:1}}
+  @keyframes dDot{0%,100%{opacity:.22;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+  @keyframes dBeam{0%{stroke-dashoffset:120}60%,100%{stroke-dashoffset:0}}
+  @keyframes dGrass{0%{transform:translate(64px,46px) scale(.6);opacity:0}30%{opacity:1}70%,100%{transform:translate(0,0) scale(1);opacity:1}}
+  @keyframes dHit{0%,100%{transform:translateY(-10px)}40%{transform:translateY(4px)}}
+  @keyframes dRing{0%,70%{opacity:0;transform:scale(.4)}85%{opacity:.7;transform:scale(1.5)}100%{opacity:0;transform:scale(1.8)}}
+  @keyframes dRidge{0%{stroke-dashoffset:150}55%,100%{stroke-dashoffset:0}}
+  @keyframes dScissor{0%,100%{transform:translateX(-10px) rotate(-12deg)}50%{transform:translateX(10px) rotate(12deg)}}
+  @keyframes dRibbon{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.55)}}
+  @keyframes strike{0%{transform:rotate(-36deg)}45%{transform:rotate(9deg)}72%{transform:rotate(-4deg)}100%{transform:rotate(0deg)}}
+  .hitting #hammerInner{animation:strike .42s ease-out}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 48 48" fill="none" stroke="#f6d9a0" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 24 24 10l17 14"/><path d="M11 24v16h26V24"/><path d="M18 40V30h12v10"/>
+        </svg>
+      </div>
+      <div><b>海草房营造</b><small>非遗造房小游戏 · 苫草成厝</small></div>
+    </div>
+    <span class="badge">国家级非遗 · 海草房营造技艺</span>
+    <div class="spacer"></div>
+    <div class="tide" id="tideBox">
+      <div class="lb"><span>涨潮进度 <b id="tideLeft" style="font-weight:500;color:#a2503f"></b></span><span id="tideTxt">0%</span></div>
+      <div class="track"><div class="fill" id="tideFill"></div></div>
+    </div>
+    <button class="iconbtn" id="btnSound" title="音效开关">🔊</button>
+    <button class="iconbtn" id="btnReset" title="重新开始">↻</button>
+  </header>
+
+  <main>
+    <div class="scene" id="sceneWrap">
+      <div class="hint"><i></i><span id="hintText">点击地面，为海草房选址</span></div>
+      <svg id="scene" viewBox="20 150 520 290" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="tag">中我岛村 · 海草房营造体验</div>
+    </div>
+
+    <aside class="panel">
+      <div class="steps" id="steps"></div>
+      <div class="stagehead"><span class="no" id="stageNo">STEP 01</span><h2 id="stageName">选址夯基</h2></div>
+      <div class="demo" id="demoBox"><div class="cap">操作示意</div></div>
+      <div class="tip" id="stageTip">…</div>
+      <div class="controls" id="controls"></div>
+      <div class="stat"><span>工艺分 <b id="scoreVal">0</b></span><span>已完成 <b id="doneVal">0</b>/7 步</span></div>
+    </aside>
+  </main>
+</div>
+
+<div class="overlay" id="kOverlay">
+  <div class="card">
+    <div class="k">非遗知识 · 海草房营造技艺</div>
+    <h3 id="kTitle">…</h3>
+    <p id="kText">…</p>
+    <div class="note" id="kNote">…</div>
+    <div class="acts"><button class="btn primary" id="kNext">继续营造</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <div class="card">
+    <div class="k" id="endKicker">落成 · 海草房</div>
+    <h3 id="endTitle">恭喜，你的海草房落成了！</h3>
+    <p id="endText">…</p>
+    <div class="done-grid">
+      <div><em>用时</em><b id="endTime">--</b></div>
+      <div><em>工艺分</em><b id="endScore">--</b></div>
+      <div><em>潮位剩余</em><b id="endTide">--</b></div>
+    </div>
+    <div class="grade" id="endGrade"></div>
+    <div class="acts">
+      <button class="btn" id="endAgain">再造一座</button>
+      <button class="btn" id="endCard">⬇ 下载纪念卡</button>
+      <button class="btn primary" id="endClose">收下这座房子</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   数据
+   ========================================================= */
+const STAGES = [
+  { n:'选址夯基', tip:'背风向阳、离海不远、土质坚实，才能起一座百年海草房。',
+    k:'房基与选地', t:'海草房多选在向阳坡地，房基用花岗岩条石砌筑，高出地面约半米，防潮、防涝、防海浪。',
+    note:'中我岛村现存明代以来海草房 97 座、388 间，是中国生态建筑活标本。' },
+  { n:'砌石墙', tip:'从石料堆拖石头到墙基上。下面的石头砌好了，上面的才能放——悬空的石头放不住。',
+    k:'干砌石墙', t:'石墙不勾缝、干砌为主，靠石块自重与错缝咬合承重，墙厚约 50 厘米，冬暖夏凉。',
+    note:'砌墙讲究“大石压底、小石塞缝”，上层石块要压住下层两块石头的接缝。' },
+  { n:'立木架', tip:'按 1→2→3→4 的顺序点榫卯节点：先立两根柱子，再架横梁，最后上人字架。',
+    k:'榫卯屋架', t:'屋架用本地松木，立柱、抬梁、檩条以榫卯连接；举架高、坡度陡，让雨水顺草顶快速排走。',
+    note:'榫卯不用铁钉，靠木构件互相咬合，地震时还能“晃而不散”。' },
+  { n:'苫海草', tip:'从草堆拖草束到屋面上，5 段屋面依次铺满；草束不够就去草堆再取。',
+    k:'大叶藻苫顶', t:'屋顶用大叶藻苫盖，厚达 30–50 厘米，层层叠压、由下往上，苫一次可保 30–50 年不腐。',
+    note:'苫草要选粗细均匀的大叶藻，铺太薄会漏雨，太厚压不住。' },
+  { n:'拍草夯实', tip:'木槌在绿区时点击，拍实草层；连续 5 次。',
+    k:'木槌拍实', t:'苫草后用木槌反复拍打，使草层密实、表面顺滑；这是海草房防漏的关键工序。',
+    note:'老师傅拍草讲究“轻起重落、层层压实”，一遍拍不实就要返工。' },
+  { n:'压脊收边', tip:'按住屋脊，从左端一直拖到右端，压出圆润的马鞍脊。',
+    k:'压脊收边', t:'屋脊处草层加厚，用草绳、竹条压牢，两侧剪齐，形成圆润的“马鞍脊”。',
+    note:'脊线压得直不直，一眼就能看出匠人的手艺。' },
+  { n:'剪彩落成', tip:'点击剪彩，挂红落成。',
+    k:'挂红落成', t:'胶东民居落成有“挂红”习俗，亲友道贺、贴剪纸窗花，寓意吉庆有余。',
+    note:'草顶、石墙、木窗格，是胶东渔村最典型的三件“传家宝”。' }
+];
+
+const S = {
+  stage:1, score:0, done:0, tide:0, tideRate:.32, paused:false,
+  wallPlaced:{}, bundles:8, thatch:0, tampHits:[], ridge:0,
+  dragging:false, done_at:0, startAt:0, sound:true
+};
+
+const VB = { x:20, y:150, w:520, h:290 };
+const $ = s => document.querySelector(s);
+const svgNS = 'http://www.w3.org/2000/svg';
+const scene = $('#scene');
+
+/* =========================================================
+   音效
+   ========================================================= */
+let AC = null;
+function beep(f, dur, type, vol){
+  if(!S.sound) return;
+  try{
+    if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type||'sine'; o.frequency.value=f; g.gain.value=vol==null?.07:vol;
+    o.connect(g); g.connect(AC.destination);
+    const t=AC.currentTime; o.start(t); g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.12));
+    o.stop(t+(dur||.12)+.02);
+  }catch(e){}
+}
+const sfxClick=()=>beep(520,.08,'triangle',.05);
+const sfxStone=()=>beep(210,.1,'square',.05);
+const sfxHammer=()=>beep(140,.09,'sawtooth',.07);
+const sfxGood=()=>{beep(660,.1,'sine',.06);setTimeout(()=>beep(880,.14,'sine',.05),90);};
+const sfxBad=()=>beep(160,.2,'sine',.05);
+
+/* =========================================================
+   工具
+   ========================================================= */
+function svgEl(tag, attrs){
+  const el=document.createElementNS(svgNS,tag);
+  for(const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+function toSvg(ev){
+  const r=scene.getBoundingClientRect();
+  return { x: VB.x + (ev.clientX-r.left)/r.width*VB.w, y: VB.y + (ev.clientY-r.top)/r.height*VB.h };
+}
+function floatText(txt, x, y){
+  const wrap=$('#sceneWrap'), r=wrap.getBoundingClientRect(), sr=scene.getBoundingClientRect();
+  const sx=sr.width/VB.w, sy=sr.height/VB.h;
+  const el=document.createElement('div');
+  el.className='float'; el.textContent=txt;
+  el.style.left=((x-VB.x)*sx+(sr.left-r.left))+'px';
+  el.style.top=((y-VB.y)*sy+(sr.top-r.top))+'px';
+  wrap.appendChild(el); setTimeout(()=>el.remove(),900);
+}
+
+/* =========================================================
+   场景
+   ========================================================= */
+let SLOTS = [];
+function drawScene(){
+  scene.innerHTML='';
+  const defs=svgEl('defs',{});
+  defs.innerHTML=`
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe3ef"/><stop offset=".62" stop-color="#e8f4f7"/><stop offset="1" stop-color="#f6efe2"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fa3b8"/><stop offset="1" stop-color="#2b7b92"/></linearGradient>
+    <linearGradient id="thatch" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b79b5c"/><stop offset=".5" stop-color="#957a3d"/><stop offset="1" stop-color="#6f5a2c"/></linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a9a091"/><stop offset="1" stop-color="#7d7466"/></linearGradient>`;
+  scene.appendChild(defs);
+  scene.appendChild(svgEl('rect',{x:0,y:0,width:640,height:440,fill:'url(#sky)'}));
+  for(const [cx,cy,r] of [[110,66,22],[138,60,16],[86,62,15],[500,52,20],[528,46,14]])
+    scene.appendChild(svgEl('circle',{cx,cy,r,fill:'#fff',opacity:.72}));
+  scene.appendChild(svgEl('path',{d:'M0,300 C120,286 220,306 330,298 C440,290 540,308 640,296 L640,440 L0,440 Z',fill:'url(#sea)',opacity:.85}));
+  for(let i=0;i<4;i++){
+    scene.appendChild(svgEl('path',{d:`M${20+i*24},${336+i*16} q22,-7 44,0 t44,0`,stroke:'rgba(255,255,255,.45)','stroke-width':1.4,fill:'none'}));
+    scene.appendChild(svgEl('path',{d:`M${420+i*22},${330+i*14} q20,-6 40,0 t40,0`,stroke:'rgba(255,255,255,.45)','stroke-width':1.4,fill:'none'}));
+  }
+  scene.appendChild(svgEl('path',{d:'M0,336 C150,320 260,342 390,332 C500,324 580,338 640,330 L640,440 L0,440 Z',fill:'#e6d6b4'}));
+  scene.appendChild(svgEl('ellipse',{cx:258,cy:376,rx:176,ry:40,fill:'#d8c49c',opacity:.85}));
+  scene.appendChild(svgEl('ellipse',{cx:258,cy:376,rx:152,ry:32,fill:'#cbb48a',opacity:.6}));
+
+  // 石料堆（可拖拽）
+  const stonePile=svgEl('g',{id:'stonePile',class:'hot'});
+  stonePile.innerHTML=`<ellipse cx="0" cy="10" rx="36" ry="11" fill="#8d8478" opacity=".28"/>
+    <rect x="-32" y="-6" width="26" height="13" rx="3" fill="#9a9184"/>
+    <rect x="-4" y="-11" width="22" height="15" rx="3" fill="#8b8275"/>
+    <rect x="16" y="-4" width="20" height="11" rx="3" fill="#a49b8d"/>`;
+  stonePile.setAttribute('transform','translate(492,366)');
+  scene.appendChild(stonePile);
+
+  // 草料堆（可拖拽）
+  const grassPile=svgEl('g',{id:'grassPile',class:'hot'});
+  grassPile.innerHTML=`<ellipse cx="0" cy="14" rx="40" ry="12" fill="#b9a363" opacity=".3"/>
+    <path d="M-34,12 C-30,-18 -12,-26 0,-26 C14,-26 30,-16 34,12 Z" fill="#ad9450"/>
+    <path d="M-26,4 C-22,-12 -10,-18 0,-18 C10,-18 22,-11 26,4" fill="none" stroke="#cdb56d" stroke-width="2"/>
+    <path d="M-18,8 C-14,-2 -6,-8 0,-8 C8,-8 14,-3 18,8" fill="none" stroke="#8f7a3f" stroke-width="1.6"/>`;
+  grassPile.setAttribute('transform','translate(414,356)');
+  scene.appendChild(grassPile);
+
+  // 房基
+  scene.appendChild(svgEl('rect',{id:'foundation',x:150,y:352,width:210,height:16,rx:3,fill:'#8d8478',opacity:0}));
+  scene.appendChild(svgEl('rect',{id:'foundation2',x:156,y:348,width:198,height:8,rx:3,fill:'#a49b8d',opacity:0}));
+
+  // 石墙槽位：三行等高，左右两侧严格对齐；中间行半砖错缝
+  SLOTS=[];
+  const WH=24, WY=[334,307,280];
+  const ROWS=[
+    [[152,44.5],[199,44.5],[246,44.5],[293,44.5]],
+    [[152,24],[178.5,44.5],[225.5,44.5],[272.5,44.5],[319.5,18.5]],
+    [[152,44.5],[199,44.5],[246,44.5],[293,44.5]]
+  ];
+  const walls=svgEl('g',{id:'wallsG'});
+  ROWS.forEach((row,r)=>{
+    row.forEach(([x,w],c)=>{
+      const rect=svgEl('rect',{x,y:WY[r],width:w,height:WH,rx:3,fill:'rgba(141,132,120,.14)',stroke:'rgba(120,105,85,.45)',
+        'stroke-width':1.2,'stroke-dasharray':'4 3',opacity:0,class:'slot'});
+      walls.appendChild(rect);
+      SLOTS.push({r,c,x,y:WY[r],w,el:rect});
+    });
+  });
+  scene.appendChild(walls);
+
+  // 木架（分件）
+  const frame=svgEl('g',{id:'frameG'});
+  frame.innerHTML=`
+    <rect id="postL" x="158" y="286" width="8" height="66" rx="2" fill="#8a5a37" style="transform:scaleY(0);transform-box:fill-box;transform-origin:center bottom;transition:transform .35s ease-out"/>
+    <rect id="postR" x="342" y="286" width="8" height="66" rx="2" fill="#8a5a37" style="transform:scaleY(0);transform-box:fill-box;transform-origin:center bottom;transition:transform .35s ease-out"/>
+    <rect id="beam1" x="154" y="288" width="198" height="7" rx="2" fill="#9c6a42" opacity="0" style="transition:opacity .3s, transform .3s;transform:translateY(-26px)"/>
+    <path id="beam2" d="M158,288 L255,174 L352,288" fill="none" stroke="#9c6a42" stroke-width="7" stroke-linecap="round"
+      stroke-dasharray="340" stroke-dashoffset="340" style="transition:stroke-dashoffset .5s ease-out"/>`;
+  scene.appendChild(frame);
+
+  // 草顶 5 段
+  const roof=svgEl('g',{id:'roofG',opacity:0,style:'transition:opacity .3s'});
+  const SEG=[
+    'M124,302 L178.8,241.6 L178.8,302 Z',
+    'M178.8,302 L178.8,241.6 L229.6,191.3 L229.6,302 Z',
+    'M229.6,302 L229.6,191.3 L255,166 L280.4,191.2 L280.4,302 Z',
+    'M280.4,302 L280.4,191.2 L331.2,241.6 L331.2,302 Z',
+    'M331.2,302 L331.2,241.6 L386,302 Z'
+  ];
+  SEG.forEach((d,i)=>{
+    const p=svgEl('path',{d,fill:'#a2884a',opacity:1,'fill-opacity':0,class:'roofSeg','data-i':i,
+      stroke:'rgba(90,70,30,.22)','stroke-width':1,'style':'transition:fill-opacity .5s ease-out',
+      style:'transition:opacity .5s ease-out'});
+    roof.appendChild(p);
+  });
+  scene.appendChild(roof);
+
+  // 屋脊
+  scene.appendChild(svgEl('path',{id:'ridgeLine',d:'M124,302 Q190,205 255,166 Q320,205 386,302',
+    stroke:'#6f5a2c','stroke-width':0,fill:'none','stroke-linecap':'round','stroke-dasharray':'0 1000'}));
+
+  // 门窗
+  scene.appendChild(svgEl('g',{id:'decoG',opacity:0,style:'transition:opacity .4s'}));
+  scene.querySelector('#decoG').innerHTML=`
+    <rect x="228" y="318" width="44" height="36" rx="3" fill="#5c3d24"/>
+    <rect x="234" y="324" width="32" height="24" rx="2" fill="#2e1d10"/>
+    <rect x="180" y="300" width="26" height="24" rx="2" fill="#5c3d24"/>
+    <rect x="184" y="304" width="18" height="16" fill="#efe4cf" opacity=".9"/>
+    <path d="M184,312 h18 M193,304 v16" stroke="#5c3d24" stroke-width="2"/>
+    <rect x="296" y="300" width="26" height="24" rx="2" fill="#5c3d24"/>
+    <rect x="300" y="304" width="18" height="16" fill="#efe4cf" opacity=".9"/>
+    <path d="M300,312 h18 M309,304 v16" stroke="#5c3d24" stroke-width="2"/>`;
+
+  // 木槌
+  const hammer=svgEl('g',{id:'hammerG',opacity:0,style:'transition:opacity .3s'});
+  hammer.setAttribute('transform','translate(318,326)');
+  hammer.innerHTML='<g id="hammerInner" style="transform-box:fill-box;transform-origin:0px 100%">'
+    +'<rect x="-4" y="-46" width="8" height="52" rx="3" fill="#8a5a37"/>'
+    +'<rect x="-22" y="-64" width="44" height="20" rx="5" fill="#6b6257"/>'
+    +'<rect x="-22" y="-59" width="44" height="3" fill="#8f887c"/></g>';
+  scene.appendChild(hammer);
+
+  // 红绸
+  const ribbon=svgEl('g',{id:'ribbonG',opacity:0,style:'transition:opacity .5s'});
+  ribbon.innerHTML=`<path d="M196,186 q59,-16 118,0 q-59,12 -118,0" fill="#c0392b"/>
+    <path d="M206,190 q49,22 98,0" fill="none" stroke="#c0392b" stroke-width="3"/>`;
+  scene.appendChild(ribbon);
+
+  // 高亮层
+  scene.appendChild(svgEl('g',{id:'ghostLayer'}));
+
+  // 潮水层
+  const tg=svgEl('g',{id:'tideG','pointer-events':'none'});
+  tg.innerHTML='<defs><linearGradient id="tideGrad" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="#5fb4c4" stop-opacity=".5"/>'
+    +'<stop offset="1" stop-color="#1d5f74" stop-opacity=".78"/></linearGradient></defs>'
+    +'<rect id="tideRect" x="-40" y="440" width="720" height="0" fill="url(#tideGrad)"/>'
+    +'<path id="tideWave" d="" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2"/>';
+  scene.appendChild(tg);
+  updateTideVisual();
+}
+
+/* 潮水可视化 */
+function updateTideVisual(){
+  const rect=scene.querySelector('#tideRect'), wave=scene.querySelector('#tideWave');
+  if(!rect||!wave) return;
+  const maxH=90, h=Math.max(0,Math.min(maxH,S.tide/100*maxH)), y=440-h;
+  rect.setAttribute('y',y); rect.setAttribute('height',h+2);
+  let d='';
+  for(let x=-40;x<=640;x+=18){ const yy=y+Math.sin(x/44 + Date.now()/700)*2.0; d+=(x===-40?'M':'L')+x+','+yy.toFixed(1)+' '; }
+  wave.setAttribute('d',d);
+}
+
+/* =========================================================
+   拖拽：石头 / 草束
+   ========================================================= */
+let drag=null;
+function startDrag(ev, type){
+  if(type==='stone' && S.stage!==2) return;
+  if(type==='grass' && S.stage!==4) return;
+  ev.preventDefault();
+  const p=toSvg(ev);
+  drag={ type, p, target:null };
+  const g=svgEl('g',{id:'dragGhost','pointer-events':'none',style:'transition:transform .12s linear'});
+  if(type==='stone'){
+    g.appendChild(svgEl('rect',{x:-22,y:-12,width:44,height:24,rx:3,fill:'url(#stone)',stroke:'#6b6257','stroke-width':1,opacity:.95}));
+  } else {
+    const b=svgEl('g',{});
+    b.innerHTML=`<ellipse cx="0" cy="10" rx="24" ry="7" fill="#8a7238" opacity=".25"/>
+      <path d="M-20,8 C-17,-10 -8,-16 0,-16 C8,-16 17,-9 20,8 Z" fill="#ad9450" stroke="#8f7a3f" stroke-width="1.2"/>`;
+    g.appendChild(b);
+  }
+  g.setAttribute('transform',`translate(${p.x},${p.y})`);
+  scene.appendChild(g);
+  moveDrag(ev);
+  window.addEventListener('pointermove', moveDrag);
+  window.addEventListener('pointerup', endDrag);
+}
+function moveDrag(ev){
+  if(!drag) return;
+  const p=toSvg(ev); drag.p=p;
+  const g=scene.querySelector('#dragGhost');
+  if(g) g.setAttribute('transform',`translate(${p.x},${p.y})`);
+  if(drag.type==='stone') highlightSlot(p);
+  else highlightSeg(p);
+}
+function highlightSlot(p){
+  let best=null, bd=1e9;
+  SLOTS.forEach(s=>{
+    if(S.wallPlaced[s.r+'_'+s.c]) return;
+    const cx=s.x+s.w/2, cy=s.y+12;
+    const d=Math.hypot(cx-p.x, cy-p.y);
+    if(d<bd && d<46){ bd=d; best=s; }
+  });
+  SLOTS.forEach(s=>s.el.setAttribute('stroke', s===best ? '#3f8f6b' : 'rgba(120,105,85,.45)'));
+  SLOTS.forEach(s=>{ if(!S.wallPlaced[s.r+'_'+s.c]) s.el.setAttribute('stroke-dasharray', s===best?'0':'4 3'); });
+  drag.target=best;
+}
+function highlightSeg(p){
+  let best=null;
+  scene.querySelectorAll('.roofSeg').forEach(sg=>{
+    if(sg.dataset.done) return;
+    const bb=sg.getBBox();
+    if(p.x>=bb.x-6 && p.x<=bb.x+bb.width+6 && p.y>=bb.y-6 && p.y<=bb.y+bb.height+10) best=sg;
+  });
+  drag.target=best;
+  scene.querySelectorAll('.roofSeg').forEach(sg=>{
+    if(sg.dataset.done) return;
+    sg.setAttribute('stroke', sg===best?'#3f8f6b':'rgba(90,70,30,.22)');
+    sg.setAttribute('stroke-width', sg===best?2.4:1);
+  });
+}
+function endDrag(ev){
+  window.removeEventListener('pointermove', moveDrag);
+  window.removeEventListener('pointerup', endDrag);
+  if(!drag) return;
+  const d=drag; drag=null;
+  const g=scene.querySelector('#dragGhost');
+  const target=d.target;
+
+  if(d.type==='stone'){
+    SLOTS.forEach(s=>{ if(!S.wallPlaced[s.r+'_'+s.c]){ s.el.setAttribute('stroke','rgba(120,105,85,.45)'); s.el.setAttribute('stroke-dasharray','4 3'); }});
+    if(!target){ if(g) g.remove(); sfxBad(); floatText('放这里砌不上', d.p.x, d.p.y); return; }
+    if(!supported(target.r,target.c)){
+      if(g) g.remove(); sfxBad(); floatText('下面没石头，悬空', d.p.x, d.p.y); return;
+    }
+    // 吸附动画
+    if(g){
+      g.setAttribute('transform', `translate(${target.x+22},${target.y+12})`);
+      setTimeout(()=>{ g.remove(); placeStone(target); }, 130);
+    } else placeStone(target);
+  } else {
+    scene.querySelectorAll('.roofSeg').forEach(sg=>{ if(!sg.dataset.done){ sg.setAttribute('stroke','rgba(90,70,30,.22)'); sg.setAttribute('stroke-width',1);}});
+    if(!target){ if(g) g.remove(); sfxBad(); return; }
+    if(g){
+      const bb=target.getBBox();
+      g.setAttribute('transform', `translate(${bb.x+bb.width/2},${bb.y+bb.height/2})`);
+      setTimeout(()=>{ g.remove(); layThatch(target); }, 130);
+    } else layThatch(target);
+  }
+}
+function supported(r,c){
+  if(r===0) return true;
+  const s=SLOTS.find(o=>o.r===r&&o.c===c);
+  for(const q of SLOTS){
+    if(q.r!==r-1 || !S.wallPlaced[q.r+'_'+q.c]) continue;
+    const ov=Math.min(s.x+s.w, q.x+q.w)-Math.max(s.x, q.x);
+    if(ov >= s.w*0.45) return true;
+  }
+  return false;
+}
+function refreshSlots(){
+  SLOTS.forEach(s=>{
+    if(S.wallPlaced[s.r+'_'+s.c]) return;
+    const ok=supported(s.r,s.c);
+    s.el.setAttribute('opacity', ok?1:0);
+    s.el.setAttribute('stroke', 'rgba(120,105,85,.65)');
+    s.el.setAttribute('stroke-dasharray', '4 3');
+  });
+}
+function placeStone(slot){
+  S.wallPlaced[slot.r+'_'+slot.c]=1;
+  slot.el.setAttribute('fill','url(#stone)');
+  slot.el.setAttribute('opacity',1);
+  slot.el.setAttribute('stroke','rgba(60,50,40,.3)');
+  slot.el.setAttribute('stroke-dasharray','0');
+  S.score+=2; sfxStone();
+  floatText('+2', slot.x+slot.w/2, slot.y);
+  $('#scoreVal').textContent=Math.round(S.score);
+  const n=Object.keys(S.wallPlaced).length;
+  const cnt=$('#wallCnt'); if(cnt) cnt.textContent=n;
+  const m=$('#wallMeter'); if(m) m.style.width=(n/SLOTS.length*100)+'%';
+  refreshSlots();
+  if(n>=SLOTS.length) completeStage(2);
+}
+function layThatch(seg){
+  seg.dataset.done='1';
+  seg.setAttribute('fill-opacity',1);
+  S.thatch++; S.score+=4; S.bundles--; sfxGood();
+  const bb=seg.getBBox();
+  floatText('+4', bb.x+bb.width/2, bb.y+bb.height/2);
+  $('#scoreVal').textContent=Math.round(S.score);
+  if($('#bundleTxt')) $('#bundleTxt').textContent=S.bundles;
+  if($('#thatchTxt')) $('#thatchTxt').textContent=S.thatch;
+  if($('#thatchMeter')) $('#thatchMeter').style.width=(S.thatch/5*100)+'%';
+  if(S.thatch>=5) completeStage(4);
+}
+
+/* =========================================================
+   界面
+   ========================================================= */
+function renderSteps(){
+  $('#steps').innerHTML=STAGES.map((s,i)=>{
+    const cls=i+1<S.stage?'done':(i+1===S.stage?'cur':'');
+    return '<div class="step '+cls+'"></div>';
+  }).join('');
+  const idx=Math.min(S.stage,7);
+  $('#stageNo').textContent=S.stage>7?'已落成':'STEP '+String(S.stage).padStart(2,'0');
+  $('#stageName').textContent=STAGES[idx-1].n;
+  $('#stageTip').textContent=STAGES[idx-1].tip;
+  $('#doneVal').textContent=S.done;
+  $('#scoreVal').textContent=Math.round(S.score);
+  $('#hintText').textContent=S.stage>7?'海草房落成，挂红剪彩':STAGES[S.stage-1].tip;
+}
+
+/* ---------- 示意动画 ---------- */
+const DEMO = {
+1:`<svg viewBox="0 0 240 96">
+  <ellipse cx="120" cy="78" rx="58" ry="9" fill="#d8c49c"/>
+  <g style="animation:dHammer 1.4s ease-in-out infinite;transform-origin:150px 40px">
+    <rect x="146" y="20" width="6" height="34" rx="3" fill="#8a5a37"/>
+    <rect x="132" y="14" width="34" height="12" rx="3" fill="#6b6257"/>
+  </g>
+  <circle cx="120" cy="76" r="8" fill="#cbb48a" style="animation:dDust 1.4s ease-out infinite"/>
+  <text x="120" y="92" text-anchor="middle" font-size="9" fill="#8a7a60">点按夯实房基</text></svg>`,
+2:`<svg viewBox="0 0 240 96">
+  <rect x="96" y="66" width="88" height="6" rx="2" fill="#8d8478"/>
+  <rect x="100" y="44" width="20" height="11" rx="2" fill="#9a9184"/>
+  <rect x="122" y="44" width="20" height="11" rx="2" fill="#8b8275"/>
+  <rect x="144" y="44" width="20" height="11" rx="2" fill="#a49b8d"/>
+  <g style="animation:dStone 1.6s ease-in-out infinite">
+    <rect x="150" y="26" width="22" height="12" rx="2" fill="#9a9184" stroke="#6b6257" stroke-width="1"/>
+  </g>
+  <path d="M150 62 h22" stroke="#3f8f6b" stroke-width="2" stroke-dasharray="3 3"/>
+  <text x="120" y="90" text-anchor="middle" font-size="9" fill="#8a7a60">拖石头到墙基，下层先砌</text></svg>`,
+3:`<svg viewBox="0 0 240 96">
+  <rect x="66" y="22" width="6" height="52" rx="3" fill="#8a5a37" style="animation:dBeam 1.6s ease-out infinite"/>
+  <rect x="168" y="22" width="6" height="52" rx="3" fill="#8a5a37" style="animation:dBeam 1.6s .2s ease-out infinite"/>
+  <path d="M69,26 L120,4 L171,26" fill="none" stroke="#9c6a42" stroke-width="5" stroke-linecap="round"
+        stroke-dasharray="120" style="animation:dBeam 1.6s .5s ease-out infinite"/>
+  <rect x="66" y="24" width="108" height="6" rx="3" fill="#a8764b" opacity=".9" style="animation:dBeam 1.6s .8s ease-out infinite"/>
+  <g font-size="10" font-weight="700" fill="#b13b2a">
+    <circle cx="70" cy="60" r="7" fill="#e9c46a" style="animation:dDot 1.6s infinite"/>
+    <circle cx="172" cy="60" r="7" fill="#e9c46a" style="animation:dDot 1.6s .35s infinite"/>
+    <circle cx="120" cy="30" r="7" fill="#e9c46a" style="animation:dDot 1.6s .7s infinite"/>
+    <circle cx="120" cy="12" r="7" fill="#e9c46a" style="animation:dDot 1.6s 1.05s infinite"/>
+  </g>
+  <text x="120" y="90" text-anchor="middle" font-size="9" fill="#8a7a60">按 1→2→3→4 点榫卯</text></svg>`,
+4:`<svg viewBox="0 0 240 96">
+  <g style="animation:dGrass 1.8s ease-in-out infinite">
+    <path d="M-22,10 C-18,-10 -8,-16 0,-16 C8,-16 18,-9 22,10 Z" fill="#ad9450" stroke="#8f7a3f"/>
+    <ellipse cx="0" cy="12" rx="24" ry="6" fill="#8a7238" opacity=".2"/>
+  </g>
+  <path d="M96,74 L120,34 L144,74 Z" fill="none" stroke="#b3a06a" stroke-dasharray="4 3"/>
+  <path d="M96,74 L120,34 L144,74 Z" fill="#a98f52" opacity=".35" style="animation:dFade 1.8s infinite"/>
+  <text x="120" y="90" text-anchor="middle" font-size="9" fill="#8a7a60">拖草束到屋面，逐段铺满</text></svg>`,
+5:`<svg viewBox="0 0 240 96">
+  <rect x="50" y="52" width="140" height="12" rx="6" fill="#efe2cf" stroke="#d9c9ad"/>
+  <rect x="108" y="52" width="26" height="12" fill="#3f8f6b" opacity=".3"/>
+  <circle cx="121" cy="58" r="5" fill="#b13b2a" style="animation:dSlide 1.2s ease-in-out infinite"/>
+  <g style="animation:dHit 1.2s ease-in-out infinite;transform-origin:120px 20px">
+    <rect x="116" y="6" width="30" height="10" rx="4" fill="#6b6257" transform="rotate(-16 120 20)"/>
+    <rect x="130" y="14" width="6" height="26" rx="3" fill="#8a5a37" transform="rotate(-16 120 20)"/>
+  </g>
+  <circle cx="121" cy="58" r="9" fill="none" stroke="#3f8f6b" style="animation:dRing 1.2s ease-out infinite"/>
+  <text x="120" y="90" text-anchor="middle" font-size="9" fill="#8a7a60">绿区里点木槌</text></svg>`,
+6:`<svg viewBox="0 0 240 96">
+  <path d="M50,60 Q90,20 120,16 Q150,20 190,60" fill="none" stroke="#cbb48a" stroke-width="8" stroke-linecap="round"/>
+  <path d="M50,60 Q90,20 120,16 Q150,20 190,60" fill="none" stroke="#b13b2a" stroke-width="4" stroke-linecap="round"
+        stroke-dasharray="150" style="animation:dRidge 2s ease-in-out infinite"/>
+  <circle cx="50" cy="60" r="6" fill="#b13b2a" style="animation:dSlide 2s ease-in-out infinite"/>
+  <text x="120" y="88" text-anchor="middle" font-size="9" fill="#8a7a60">沿屋脊从左拖到右</text></svg>`,
+7:`<svg viewBox="0 0 240 96">
+  <rect x="86" y="52" width="68" height="6" rx="3" fill="#c0392b" style="animation:dRibbon 1.4s ease-in-out infinite"/>
+  <g style="animation:dScissor 1.4s ease-in-out infinite;transform-origin:120px 46px">
+    <path d="M112,38 L128,52 M128,38 L112,52" stroke="#6b6257" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="108" cy="36" r="4" fill="none" stroke="#6b6257" stroke-width="2"/>
+    <circle cx="132" cy="36" r="4" fill="none" stroke="#6b6257" stroke-width="2"/>
+  </g>
+  <text x="120" y="88" text-anchor="middle" font-size="9" fill="#8a7a60">点击剪彩落成</text></svg>`
+};
+function renderDemo(stage){
+  const box=$('#demoBox');
+  box.innerHTML=(DEMO[stage]||DEMO[1])+'<div class="cap">操作示意</div>';
+}
+
+/* ---------- 控件 ---------- */
+function renderControls(){
+  const box=$('#controls'); box.innerHTML='';
+  const st=S.stage;
+
+  if(st===1){
+    box.innerHTML=`<div class="row"><span class="chip">点击 3 次夯实</span></div>
+      <button class="btn primary" id="btnFoundation">夯实房基（3 次）</button>`;
+    let n=0;
+    const hg=scene.querySelector('#hammerG');
+    if(hg) hg.setAttribute('opacity',1);
+    $('#btnFoundation').onclick=()=>{
+      n++; beep(180+n*40,.1,'square',.06);
+      scene.querySelector('#foundation').setAttribute('opacity',Math.min(1,n/3));
+      scene.querySelector('#foundation2').setAttribute('opacity',Math.min(1,n/3));
+      if(hg){
+        hg.classList.remove('hitting');
+        void hg.getBoundingClientRect();
+        hg.classList.add('hitting');
+        setTimeout(()=>hg.classList.remove('hitting'), 460);
+      }
+      floatText('夯实 '+n+'/3', 255, 348);
+      if(n>=3){ if(hg) hg.remove(); completeStage(1); }
+    };
+  }
+
+  if(st===2){
+    const n=Object.keys(S.wallPlaced).length;
+    box.innerHTML=`<div class="row"><span class="chip">已砌 <b id="wallCnt">${n}</b>/${SLOTS.length}</span><span class="chip">拖动石头 · 下层先砌</span></div>
+      <div class="meter"><div id="wallMeter" style="width:${n/SLOTS.length*100}%"></div></div>`;
+    refreshSlots();
+    const pile=scene.querySelector('#stonePile');
+    pile.style.cursor='grab';
+    pile.onpointerdown=(e)=>startDrag(e,'stone');
+  }
+
+  if(st===3){
+    box.innerHTML=`<div class="row"><span class="chip">按 1→2→3→4 点击</span><span class="chip" id="jointTxt">0/4</span></div>`;
+    const pts=[[162,340],[346,340],[255,292],[255,186]];
+    const labels=['立柱','立柱','架梁','上脊'];
+    const g=svgEl('g',{id:'jointG'});
+    pts.forEach(([x,y],i)=>{
+      const grp=svgEl('g',{class:'joint',style:'cursor:pointer'});
+      const c=svgEl('circle',{cx:x,cy:y,r:15,fill:'#e9c46a',stroke:'#a8764b','stroke-width':2});
+      const t=svgEl('text',{x,y:y+5,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#5c3d24','pointer-events':'none'});
+      t.textContent=String(i+1);
+      grp.appendChild(c); grp.appendChild(t);
+      grp.onclick=()=>{
+        if(grp.dataset.done) return;
+        if(i===S.joints.length){
+          S.joints.push(i); S.score+=3; sfxClick();
+          grp.dataset.done='1';
+          c.setAttribute('fill','#8fbf7a'); c.setAttribute('stroke','#5f8f4e');
+          animateFramePart(i);
+          $('#jointTxt').textContent=S.joints.length+'/4';
+          $('#scoreVal').textContent=Math.round(S.score);
+          floatText(labels[i]+' +3', x, y-18);
+          if(S.joints.length>=4) setTimeout(()=>completeStage(3), 500);
+        } else {
+          sfxBad(); c.setAttribute('fill','#e2915a'); setTimeout(()=>c.setAttribute('fill','#e9c46a'),300);
+          floatText('按 1→2→3→4 顺序', x, y-18);
+        }
+      };
+      g.appendChild(grp);
+    });
+    scene.appendChild(g);
+  }
+
+  if(st===4){
+    box.innerHTML=`<div class="row"><span class="chip">草束 <b id="bundleTxt">${S.bundles}</b></span><span class="chip">已苫 <b id="thatchTxt">${S.thatch}</b>/5</span></div>
+      <div class="meter"><div id="thatchMeter" style="width:${S.thatch/5*100}%"></div></div>
+      <button class="btn" id="btnPickGrass">去草堆再取一束</button>`;
+    $('#btnPickGrass').onclick=()=>{ if(S.bundles>=8){sfxBad();return;} S.bundles++; $('#bundleTxt').textContent=S.bundles; sfxClick(); };
+    const rg=scene.querySelector('#roofG'); if(rg) rg.setAttribute('opacity',1);
+    scene.querySelectorAll('.roofSeg').forEach(sg=>{
+      if(!sg.dataset.done){ sg.setAttribute('fill-opacity',.18); }
+    });
+    const pile=scene.querySelector('#grassPile');
+    pile.style.cursor='grab';
+    pile.onpointerdown=(e)=>{ if(S.bundles<=0){ sfxBad(); floatText('先去取草', 414, 330); return; } startDrag(e,'grass'); };
+  }
+
+  if(st===5){
+    box.innerHTML=`<div class="row"><span class="chip">指示条进入绿区时点击</span><span class="chip" id="tampTxt">0/5</span></div>
+      <div class="rhythm"><div class="zone"></div><div class="knob" id="knob"></div><div class="hits" id="hits"></div></div>
+      <div class="row"><span class="chip">速度</span>
+        <button class="btn spd" data-spd="0.0040" style="height:30px;padding:0 12px;font-size:12px">慢</button>
+        <button class="btn spd" data-spd="0.0075" style="height:30px;padding:0 12px;font-size:12px">中</button>
+        <button class="btn spd" data-spd="0.0120" style="height:30px;padding:0 12px;font-size:12px">快</button>
+      </div>
+      <button class="btn primary" id="btnTamp">🔨 拍草</button>`;
+    S.rhythmSpeed=S.rhythmSpeed||0.0040;
+    box.querySelectorAll('.spd').forEach(b=>{
+      if(parseFloat(b.dataset.spd)===S.rhythmSpeed) b.classList.add('primary');
+      b.onclick=()=>{
+        S.rhythmSpeed=parseFloat(b.dataset.spd);
+        box.querySelectorAll('.spd').forEach(o=>o.classList.remove('primary'));
+        b.classList.add('primary');
+      };
+    });
+    startRhythm();
+  }
+
+  if(st===6){
+    box.innerHTML=`<div class="row"><span class="chip">按住屋脊从左拖到右</span><span class="chip" id="ridgeTxt">0%</span></div>
+      <div class="meter"><div id="ridgeMeter"></div></div>`;
+    enableRidge();
+  }
+
+  if(st===7){
+    box.innerHTML=`<div class="row"><span class="chip">房子已完工</span></div>
+      <button class="btn primary" id="btnCut">✂ 剪彩落成</button>`;
+    $('#btnCut').onclick=()=>completeStage(7);
+  }
+}
+
+/* 木架分件动画 */
+function animateFramePart(i){
+  const f=scene;
+  if(i===0){ const el=f.querySelector('#postL'); el.style.transform='scaleY(1)'; }
+  if(i===1){ const el=f.querySelector('#postR'); el.style.transform='scaleY(1)'; }
+  if(i===2){ const el=f.querySelector('#beam1'); el.style.opacity=1; el.style.transform='translateY(0)'; }
+  if(i===3){ const el=f.querySelector('#beam2'); el.style.strokeDashoffset=0; }
+}
+
+/* 节奏 */
+let raf=null, t=0, dir=1;
+function startRhythm(){
+  const knob=$('#knob'); S.tampHits=[]; t=0; dir=1;
+  if(raf) cancelAnimationFrame(raf);
+  function loop(){ t+=dir*(S.rhythmSpeed||0.0040); if(t>1){t=1;dir=-1;} if(t<0){t=0;dir=1;} knob.style.left=(t*100)+'%'; raf=requestAnimationFrame(loop); }
+  loop();
+  $('#btnTamp').onclick=()=>{
+    const d=Math.abs(t-.5); let pts=0,lb='';
+    if(d<=.075){pts=6;lb='完美';} else if(d<=.15){pts=3;lb='不错';} else {pts=0;lb='偏了';}
+    S.tampHits.push(pts); S.score+=pts; sfxHammer();
+    floatText(lb+(pts?' +'+pts:''), 250, 230);
+    $('#hits').textContent=S.tampHits.length+'/5';
+    $('#tampTxt').textContent=S.tampHits.length+'/5';
+    $('#scoreVal').textContent=Math.round(S.score);
+    if(S.tampHits.length>=5){ cancelAnimationFrame(raf); setTimeout(()=>completeStage(5),400); }
+  };
+}
+
+/* 压脊 */
+function enableRidge(){
+  const ridge=scene.querySelector('#ridgeLine');
+  const hot=scene.querySelector('#ghostLayer');
+  hot.style.pointerEvents='auto';
+  const hit=svgEl('path',{d:'M124,302 Q190,205 255,166 Q320,205 386,302',fill:'none',stroke:'transparent',
+    'stroke-width':46,'stroke-linecap':'round','pointer-events':'stroke'});
+  hot.appendChild(hit);
+  let pts=[];
+  function dx(clientX){ const r=scene.getBoundingClientRect(); return VB.x+(clientX-r.left)/r.width*VB.w; }
+  function down(e){ S.dragging=true; pts=[dx(e.clientX)]; ridge.setAttribute('stroke-width',12); ridge.setAttribute('stroke-dasharray','0 1000'); }
+  function move(e){ if(!S.dragging) return; pts.push(dx(e.clientX));
+    const cov=Math.max(0,Math.min(1,(Math.max(...pts)-124)/(386-124)));
+    S.ridge=Math.max(S.ridge,cov);
+    ridge.setAttribute('stroke-dasharray',(cov*380)+' 1000');
+    $('#ridgeMeter').style.width=(cov*100)+'%'; $('#ridgeTxt').textContent=Math.round(cov*100)+'%';
+  }
+  function up(){ if(!S.dragging) return; S.dragging=false;
+    window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up);
+    if(S.ridge>=.9){ S.score+=15; $('#scoreVal').textContent=Math.round(S.score); completeStage(6); }
+    else { sfxBad(); floatText('再拖一次', 255, 200); }
+  }
+  hit.addEventListener('pointerdown',down);
+  window.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',up);
+}
+
+/* =========================================================
+   阶段 / 知识卡
+   ========================================================= */
+function completeStage(n){
+  S.stage=n+1; S.done=n;
+  if(n===3){ const jg=scene.querySelector('#jointG'); if(jg) jg.remove(); }
+  if(n===3){ scene.querySelector('#decoG').setAttribute('opacity',1); }
+  if(n===4){ ['#beam1','#beam2'].forEach(function(id){ var el=scene.querySelector(id); if(el) el.style.opacity=.18; }); }
+  renderSteps(); renderDemo(Math.min(S.stage,7)); renderControls();
+  showKnowledge(n);
+}
+function showKnowledge(n){
+  const k=STAGES[n-1];
+  $('#kTitle').textContent=k.k;
+  $('#kText').textContent=k.t;
+  $('#kNote').textContent=k.note;
+  $('#kOverlay').classList.add('on');
+  S.paused=true; sfxGood();
+}
+$('#kNext').onclick=()=>{
+  $('#kOverlay').classList.remove('on'); S.paused=false;
+  if(S.stage>7) finishGame();
+};
+
+/* =========================================================
+   潮汐 / 结算
+   ========================================================= */
+let last=0;
+function tick(ts){
+  if(!last) last=ts;
+  const dt=(ts-last)/1000; last=ts;
+  if(!S.paused && S.stage<=7 && !S.done_at){
+    S.tide=Math.min(100,S.tide+S.tideRate*dt);
+    $('#tideFill').style.right=(100-S.tide)+'%';
+    $('#tideTxt').textContent=Math.round(S.tide)+'%';
+    $('#tideBox').classList.toggle('warn',S.tide>70);
+    const left=Math.max(0,Math.round((100-S.tide)/S.tideRate));
+    const rt=$('#tideLeft'); if(rt) rt.textContent='· 剩余 '+Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+    updateTideVisual();
+    if(S.tide>=100) gameOver();
+  }
+  requestAnimationFrame(tick);
+}
+function elapsed(){ return S.startAt?(Date.now()-S.startAt)/1000:0; }
+function fmt(s){ s=Math.round(s); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function gameOver(){
+  S.paused=true;
+  $('#endKicker').textContent='潮水来了 · 未能完工';
+  $('#endTitle').textContent='海草房没能赶在涨潮前完工';
+  $('#endText').textContent='潮水漫过地基，草料被浪打湿。别急，海草房讲究“慢工出细活”，再来一次吧。';
+  $('#endTime').textContent=fmt(elapsed());
+  $('#endScore').textContent=Math.round(S.score);
+  $('#endTide').textContent='0%';
+  $('#endGrade').textContent='';
+  $('#endAgain').textContent='再来一次';
+  $('#endOverlay').classList.add('on');
+}
+function finishGame(){
+  if(S.done_at) return;
+  S.done_at=Date.now(); S.paused=true;
+  scene.querySelector('#ribbonG').setAttribute('opacity',1);
+  sfxGood();
+  const left=Math.round(100-S.tide);
+  S.score+=Math.round(left*.3);
+  $('#endKicker').textContent='落成 · 海草房';
+  $('#endTitle').textContent='恭喜，你的海草房落成了！';
+  $('#endText').textContent='铺石基、干砌墙、榫卯立架、大叶藻苫顶、木槌拍实、压脊收边——你用传统工序盖起了一座海草房。';
+  $('#endTime').textContent=fmt(elapsed());
+  $('#endScore').textContent=Math.round(S.score);
+  $('#endTide').textContent=left+'%';
+  const g=S.score>=120?'非遗小匠人 · 甲等':(S.score>=90?'熟练匠人 · 乙等':'入门学徒 · 丙等');
+  $('#endGrade').textContent=g+'（潮位剩余奖励 +'+Math.round(left*.3)+'）';
+  $('#endOverlay').classList.add('on');
+  $('#endAgain').textContent='再造一座';
+}
+
+/* =========================================================
+   重置 / 启动
+   ========================================================= */
+function reset(){
+  S.stage=1; S.score=0; S.done=0; S.tide=0; S.paused=false;
+  S.wallPlaced={}; S.bundles=8; S.thatch=0; S.tampHits=[]; S.ridge=0;
+  S.dragging=false; S.done_at=0; S.startAt=Date.now(); S.joints=[];
+  if(raf) cancelAnimationFrame(raf);
+  $('#tideFill').style.right='100%'; $('#tideTxt').textContent='0%';
+  $('#endOverlay').classList.remove('on'); $('#kOverlay').classList.remove('on');
+  drawScene();
+  renderSteps(); renderDemo(1); renderControls();
+}
+$('#btnReset').onclick=()=>{ reset(); };
+$('#btnSound').onclick=()=>{ S.sound=!S.sound; $('#btnSound').textContent=S.sound?'🔊':'🔇'; };
+$('#endAgain').onclick=()=>{ reset(); };
+$('#endClose').onclick=()=>{ $('#endOverlay').classList.remove('on'); };
+$('#endCard').onclick=downloadCard;
+
+function rrect(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
+
+function downloadCard(){
+  const sc=document.getElementById('scene');
+  const clone=sc.cloneNode(true);
+  clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  clone.setAttribute('width','1040'); clone.setAttribute('height','580');
+  const src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(clone));
+  const img=new Image();
+  img.onload=function(){
+    const W=900,H=1260, c=document.createElement('canvas'); c.width=W; c.height=H;
+    const x=c.getContext('2d');
+    const g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#fdf8ee'); g.addColorStop(1,'#eee0c9');
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+    x.strokeStyle='#c9a15a'; x.lineWidth=5; x.strokeRect(26,26,W-52,H-52);
+    x.strokeStyle='rgba(201,161,90,.4)'; x.lineWidth=1; x.strokeRect(42,42,W-84,H-84);
+    x.textAlign='center';
+    x.fillStyle='#a93427'; x.font='bold 46px "Songti SC","SimSun",serif';
+    x.fillText('海草房落成纪念卡',W/2,118);
+    x.fillStyle='#6f645c'; x.font='21px "PingFang SC","Microsoft YaHei",sans-serif';
+    x.fillText('中我岛村 · 国家级非遗「海草房营造技艺」',W/2,158);
+    const iw=W-140, ih=iw*580/1040;
+    x.save(); rrect(x,70,196,iw,ih,14); x.clip(); x.drawImage(img,70,196,iw,ih); x.restore();
+    x.strokeStyle='rgba(160,130,80,.5)'; x.lineWidth=3; rrect(x,70,196,iw,ih,14); x.stroke();
+    const y0=196+ih+54;
+    const stats=[['用时',fmt(elapsed())],['工艺分',String(Math.round(S.score))],['潮位剩余',Math.round(100-S.tide)+'%']];
+    stats.forEach(function(it,i){
+      const bw=232, bx=W/2-360+i*248;
+      x.fillStyle='#fffdf8'; x.strokeStyle='#e3d6c2'; x.lineWidth=2; rrect(x,bx,y0,bw,108,14); x.fill(); x.stroke();
+      x.fillStyle='#7b6f64'; x.font='17px "PingFang SC",sans-serif'; x.fillText(it[0],bx+bw/2,y0+40);
+      x.fillStyle='#a93427'; x.font='bold 38px "DIN Alternate","Bahnschrift",sans-serif'; x.fillText(it[1],bx+bw/2,y0+88);
+    });
+    const gtxt=$('#endGrade').textContent||'';
+    x.fillStyle='#a93427'; x.font='bold 24px "PingFang SC",sans-serif';
+    x.fillText(gtxt.replace(/（.*/,''),W/2,y0+164);
+    x.fillStyle='#5d5349'; x.font='18px "PingFang SC",sans-serif';
+    const line='铺石基 · 干砌墙 · 榫卯立架 · 大叶藻苫顶 · 木槌拍实 · 压脊收边';
+    x.fillText(line,W/2,y0+206);
+    x.fillStyle='#8b7f72'; x.font='16px "PingFang SC",sans-serif';
+    x.fillText('海草房冬暖夏凉、苫一次可保 30–50 年，是胶东渔村的活态遗产',W/2,y0+244);
+    const d=new Date();
+    x.fillStyle='#a08f7a'; x.font='16px "PingFang SC",sans-serif';
+    x.fillText(d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+' · 胶东织梦队 · 中我岛村',W/2,H-72);
+    x.fillStyle='#c0a880'; x.font='13px "PingFang SC",sans-serif';
+    x.fillText('NO.'+String(Math.floor(Math.random()*9000+1000)), W/2, H-46);
+    c.toBlob(function(b){
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(b); a.download='中我岛村_海草房纪念卡.png';
+      document.body.appendChild(a); a.click(); a.remove();
+    },'image/png');
+  };
+  img.onerror=function(){ alert('纪念卡生成失败，请重试'); };
+  img.src=src;
+}
+
+/* 启动 */
+S.joints=[];
+drawScene();
+renderSteps();
+renderDemo(1);
+renderControls();
+S.startAt=Date.now();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
